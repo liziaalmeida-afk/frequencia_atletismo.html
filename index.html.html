@@ -1,0 +1,544 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Frequência – Atletismo APADA</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Sora:wght@300;400;600;700&family=Space+Mono:wght@400;700&display=swap');
+  :root {
+    --verde: #00C896; --verde-escuro: #00A07A;
+    --fundo: #0D1B2A; --card: #152233; --card2: #1C2E42;
+    --texto: #E8F4F0; --cinza: #4A6580;
+    --vermelho: #FF5A5A; --amarelo: #FFD166; --azul: #4EA8DE;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Sora', sans-serif; background: var(--fundo); color: var(--texto); min-height: 100vh; padding: 20px; }
+
+  header { text-align: center; padding: 20px 0 14px; }
+  header h1 { font-size: 1.6rem; font-weight: 700; color: var(--verde); }
+  header p { color: var(--cinza); font-size: 0.82rem; margin-top: 3px; }
+  .data-badge { display: inline-block; background: var(--card2); border: 1px solid var(--verde); color: var(--verde); font-family: 'Space Mono', monospace; font-size: 0.78rem; padding: 3px 12px; border-radius: 20px; margin-top: 8px; }
+
+  /* Login */
+  #login-screen { text-align: center; padding: 40px 20px; }
+  #login-screen h2 { color: var(--verde); margin-bottom: 12px; }
+  #login-screen p { color: var(--cinza); font-size: 0.88rem; margin-bottom: 24px; line-height: 1.6; }
+  .btn-google { background: #fff; color: #333; border: none; padding: 14px 28px; border-radius: 12px; font-family: 'Sora', sans-serif; font-size: 1rem; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 10px; box-shadow: 0 2px 12px rgba(0,0,0,0.3); transition: all 0.15s; }
+  .btn-google:hover { transform: translateY(-1px); box-shadow: 0 4px 18px rgba(0,0,0,0.4); }
+  .btn-google img { width: 22px; }
+
+  /* Sync badge */
+  .sync-bar { display: flex; align-items: center; justify-content: space-between; background: var(--card); border-radius: 10px; padding: 8px 14px; margin-bottom: 16px; font-size: 0.78rem; flex-wrap: wrap; gap: 6px; }
+  .sync-status { display: flex; align-items: center; gap: 6px; }
+  .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--cinza); }
+  .dot.ok { background: var(--verde); }
+  .dot.syncing { background: var(--amarelo); animation: pulse 1s infinite; }
+  .dot.erro { background: var(--vermelho); }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
+  .btn-logout { background: transparent; border: 1px solid var(--cinza); color: var(--cinza); padding: 4px 10px; border-radius: 6px; font-size: 0.72rem; cursor: pointer; font-family: 'Sora', sans-serif; }
+  .btn-logout:hover { border-color: var(--vermelho); color: var(--vermelho); }
+
+  /* Equipe */
+  .equipe-section { background: var(--card); border-radius: 14px; padding: 14px 18px; margin-bottom: 18px; border-left: 3px solid var(--azul); }
+  .equipe-title { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 1px; color: var(--azul); font-weight: 700; margin-bottom: 10px; }
+  .prof-block { background: var(--card2); border-radius: 10px; padding: 10px 12px; margin-bottom: 8px; }
+  .prof-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+  .prof-info { flex: 1; min-width: 140px; }
+  .prof-cargo { font-size: 0.68rem; color: var(--azul); text-transform: uppercase; letter-spacing: 0.5px; }
+  .prof-nome { font-size: 0.88rem; font-weight: 600; margin-top: 1px; }
+  .prof-hora { font-family: 'Space Mono', monospace; font-size: 0.68rem; color: var(--cinza); min-width: 40px; text-align: right; }
+  .toggle { display: flex; gap: 5px; }
+  .btn-status { padding: 5px 12px; border-radius: 7px; border: none; font-family: 'Sora', sans-serif; font-size: 0.75rem; font-weight: 600; cursor: pointer; transition: all 0.15s; opacity: 0.35; }
+  .btn-status.presente { background: var(--verde); color: #0D1B2A; }
+  .btn-status.ausente { background: var(--vermelho); color: #fff; }
+  .btn-status.active { opacity: 1; }
+  .just-wrap { margin-top: 8px; display: none; }
+  .just-wrap.show { display: block; }
+  .just-label { font-size: 0.68rem; color: var(--vermelho); text-transform: uppercase; margin-bottom: 4px; }
+  textarea { width: 100%; min-height: 48px; resize: vertical; background: var(--fundo); border: 1px solid var(--vermelho); color: var(--texto); padding: 7px 10px; border-radius: 7px; font-family: 'Sora', sans-serif; font-size: 0.82rem; outline: none; }
+  textarea::placeholder { color: var(--cinza); }
+
+  /* Stats */
+  .stats { display: flex; gap: 10px; justify-content: center; margin: 14px 0; flex-wrap: wrap; }
+  .stat { background: var(--card); border-radius: 10px; padding: 10px 18px; text-align: center; min-width: 80px; }
+  .stat .num { font-family: 'Space Mono', monospace; font-size: 1.5rem; font-weight: 700; }
+  .stat .label { font-size: 0.68rem; color: var(--cinza); text-transform: uppercase; margin-top: 2px; }
+  .stat.presentes .num { color: var(--verde); }
+  .stat.ausentes .num { color: var(--vermelho); }
+  .stat.total .num { color: var(--amarelo); }
+
+  /* Controls */
+  .controls { display: flex; gap: 8px; margin-bottom: 14px; flex-wrap: wrap; align-items: center; }
+  .search-wrap { position: relative; flex: 1; min-width: 160px; }
+  .search-wrap input { width: 100%; padding-left: 34px; }
+  .search-icon { position: absolute; left: 10px; top: 50%; transform: translateY(-50%); color: var(--cinza); font-size: 0.85rem; pointer-events: none; }
+  input[type="text"] { background: var(--card); border: 1px solid var(--cinza); color: var(--texto); padding: 9px 12px; border-radius: 9px; font-family: 'Sora', sans-serif; font-size: 0.88rem; outline: none; transition: border-color 0.2s; }
+  input[type="text"]:focus { border-color: var(--verde); }
+  .btn { padding: 9px 16px; border-radius: 9px; border: none; font-family: 'Sora', sans-serif; font-size: 0.82rem; font-weight: 600; cursor: pointer; transition: all 0.15s; }
+  .btn-add { background: var(--verde); color: #0D1B2A; }
+  .btn-add:hover { background: var(--verde-escuro); }
+  .btn-all-present { background: transparent; border: 1px solid var(--verde); color: var(--verde); }
+  .btn-export { background: var(--amarelo); color: #0D1B2A; }
+  .btn-clear { background: transparent; border: 1px solid var(--vermelho); color: var(--vermelho); font-size: 0.72rem; padding: 7px 10px; }
+
+  .filter-tabs { display: flex; gap: 6px; margin-bottom: 12px; flex-wrap: wrap; }
+  .tab { padding: 5px 14px; border-radius: 18px; border: 1px solid var(--cinza); background: transparent; color: var(--cinza); font-family: 'Sora', sans-serif; font-size: 0.78rem; cursor: pointer; transition: all 0.15s; }
+  .tab.active { background: var(--verde); color: #0D1B2A; border-color: var(--verde); font-weight: 600; }
+  .top-actions { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; flex-wrap: wrap; gap: 6px; }
+
+  /* Lista */
+  .lista { display: flex; flex-direction: column; gap: 7px; }
+  .crianca { background: var(--card); border-radius: 11px; padding: 10px 14px; animation: fadeIn 0.2s ease; }
+  @keyframes fadeIn { from{opacity:0;transform:translateY(5px)} to{opacity:1;transform:translateY(0)} }
+  .crianca:hover { background: var(--card2); }
+  .crianca-row { display: flex; align-items: center; gap: 10px; }
+  .num-ordem { font-family: 'Space Mono', monospace; font-size: 0.72rem; color: var(--cinza); min-width: 22px; text-align: right; }
+  .info { flex: 1; }
+  .nome { font-size: 0.9rem; }
+  .nascimento { font-size: 0.7rem; color: var(--cinza); margin-top: 1px; }
+  .hora-badge { font-family: 'Space Mono', monospace; font-size: 0.68rem; color: var(--cinza); min-width: 44px; text-align: right; }
+  .btn-remover { background: transparent; border: none; color: var(--cinza); font-size: 0.95rem; cursor: pointer; padding: 3px 5px; border-radius: 5px; }
+  .btn-remover:hover { color: var(--vermelho); }
+  .just-atleta { margin-top: 8px; padding-top: 8px; border-top: 1px solid var(--card2); display: none; }
+  .just-atleta.show { display: block; }
+  .just-atleta-label { font-size: 0.68rem; color: var(--vermelho); text-transform: uppercase; margin-bottom: 4px; }
+
+  .vazio { text-align: center; color: var(--cinza); padding: 36px 20px; font-size: 0.88rem; }
+  .secao-titulo { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 1px; color: var(--amarelo); font-weight: 700; margin-bottom: 8px; }
+  footer { text-align: center; margin-top: 28px; color: var(--cinza); font-size: 0.72rem; }
+
+  #app-screen { display: none; }
+</style>
+</head>
+<body>
+
+<!-- TELA DE LOGIN -->
+<div id="login-screen">
+  <header>
+    <h1>🏃 Atletismo APADA</h1>
+    <p>Araputanga · Mato Grosso</p>
+    <div class="data-badge" id="dataHoje1"></div>
+  </header>
+  <br><br>
+  <h2>Bem-vindo!</h2>
+  <p>Faça login com o Google para sincronizar<br>a frequência direto na planilha da APADA.</p>
+  <button class="btn-google" onclick="fazerLogin()">
+    <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google"/>
+    Entrar com Google
+  </button>
+</div>
+
+<!-- TELA PRINCIPAL -->
+<div id="app-screen">
+  <header>
+    <h1>🏃 Atletismo APADA</h1>
+    <p>Araputanga · Mato Grosso</p>
+    <div class="data-badge" id="dataHoje2"></div>
+  </header>
+
+  <div class="sync-bar">
+    <div class="sync-status">
+      <div class="dot" id="syncDot"></div>
+      <span id="syncMsg">Conectado ao Google Sheets</span>
+    </div>
+    <div style="display:flex;gap:8px;align-items:center;">
+      <span id="userEmail" style="font-size:0.72rem;color:var(--cinza);"></span>
+      <button class="btn-logout" onclick="fazerLogout()">Sair</button>
+    </div>
+  </div>
+
+  <div class="equipe-section">
+    <div class="equipe-title">👥 Equipe Técnica</div>
+    <div id="profLista"></div>
+  </div>
+
+  <div class="stats">
+    <div class="stat total"><div class="num" id="totalNum">0</div><div class="label">Atletas</div></div>
+    <div class="stat presentes"><div class="num" id="presentesNum">0</div><div class="label">Presentes</div></div>
+    <div class="stat ausentes"><div class="num" id="ausentesNum">0</div><div class="label">Ausentes</div></div>
+  </div>
+
+  <div class="controls">
+    <div class="search-wrap">
+      <span class="search-icon">🔍</span>
+      <input type="text" id="buscaInput" placeholder="Buscar atleta..." oninput="renderizar()" />
+    </div>
+    <button class="btn btn-add" onclick="abrirAdicionar()">+ Adicionar</button>
+  </div>
+
+  <div class="top-actions">
+    <div class="filter-tabs">
+      <button class="tab active" onclick="filtrar('todos',this)">Todos</button>
+      <button class="tab" onclick="filtrar('presentes',this)">Presentes</button>
+      <button class="tab" onclick="filtrar('ausentes',this)">Ausentes</button>
+      <button class="tab" onclick="filtrar('nao-marcados',this)">Não marcados</button>
+    </div>
+    <div style="display:flex;gap:6px;flex-wrap:wrap;">
+      <button class="btn btn-all-present" onclick="marcarTodosPresentes()">✓ Todos presentes</button>
+      <button class="btn btn-clear" onclick="limparDia()">🔄 Novo dia</button>
+    </div>
+  </div>
+
+  <div class="secao-titulo">🏅 Atletas</div>
+  <div class="lista" id="lista"></div>
+  <div class="vazio" id="vazio" style="display:none;">Nenhum atleta encontrado.</div>
+  <footer>Sincronizado com Google Sheets · Atletismo APADA 2026</footer>
+</div>
+
+<!-- Google API -->
+<script src="https://accounts.google.com/gsi/client" async defer></script>
+<script>
+  const CLIENT_ID   = '825048183829-s56818jub3en5g1hv4nql2qdfasscqg7.apps.googleusercontent.com';
+  const SHEET_ID    = '12GLMLJoN32ZicFVZfpZvLmcDF6VxZ8lf9SVKsTumir4';
+  const SCOPES      = 'https://www.googleapis.com/auth/spreadsheets';
+  const SHEET_NAME  = 'Frequência';
+
+  let accessToken = null;
+  let syncTimer   = null;
+  let pendingSync = false;
+
+  const equipeBase = [
+    { id: 'p1', cargo: 'Treinadora', nome: 'Lizia Kelle dos Santos Almeida',  status: null, hora: null, justificativa: '' },
+    { id: 'p2', cargo: 'Treinador',  nome: 'Nelson Ramos de Andrade',          status: null, hora: null, justificativa: '' },
+    { id: 'p3', cargo: 'Estagiário', nome: 'Nelson Ramos de Andrade Júnior',   status: null, hora: null, justificativa: '' },
+  ];
+
+  const listaInicial = [
+    ["Ruan Carlos Santos Silva","04/04/2012"],["Natanael Ramos de Oliveira","25/12/2012"],
+    ["Gabriel Teixeira da Silva","07/01/2016"],["David William Ramos Pereira","04/12/2011"],
+    ["Bryan Rodrigo Martins Medeiros","24/06/2011"],["Mizael Felipe Flores Duarte","06/12/2010"],
+    ["José Henrique Rojas da Silva","04/06/2011"],["Lucas Martins Silva","09/09/2009"],
+    ["Pedro Lucas Moraes da Silva","03/04/2012"],["Nicolas Miguel de Oliveira","09/01/2012"],
+    ["Emily Aicra de Oliveira","03/12/2010"],["Claudio Henrike Melchior Lemos","18/08/2011"],
+    ["Isaias Santos do Nascimento","27/02/2012"],["Geovanna Vitória de Jesus","04/03/2014"],
+    ["Pietra Victoria Melchior Lemos","21/12/2012"],["Jean Lucas Pedro da Silva","25/02/2010"],
+    ["Ana Clara Souza dos Santos","24/06/2013"],["Matheus Zagatti Rios Oliveira","11/08/2012"],
+    ["Brenno Nobokite Ribeiro","13/11/2011"],["Gustavo Souza Cabral Goulart","30/06/2009"],
+    ["Samara Souza Silva","17/07/2014"],["Nicolas Kauan Ferreira Ricarti","20/02/2013"],
+    ["Evelyn Alves da Silva","03/10/2012"],["Rebeca Carla Souza Silva","31/05/2012"],
+    ["Ana Clara Almeida Palermo","12/05/2010"],["Alana da Costa Santos","24/12/2012"],
+    ["Gabriella Soares Oliveira","02/08/2010"],["Rafael Duarte dos Santos","06/01/2003"],
+    ["Nelson Ramos de Andrade Junior","19/01/2007"],["Gabriel Ferreira Brito","01/01/2010"],
+    ["Paulo Victor Pereira Cervantes","27/06/2011"],["Gabrielly de Souza Maforte Maldonado","06/10/2010"],
+    ["Isabela de Souza Maforte Maldonado","24/09/2012"],["Emilly Araújo Viturino de Souza","17/09/2012"],
+    ["Sibele Cesário Goulart","23/12/2015"],["Alexandre Henrique da Silva Brito","06/11/1998"],
+    ["Thomas Kauan Simão Charupá","09/05/2013"],["Mauricio Dos Santos Souza Oliveira","28/06/2006"],
+    ["Ronaldo Toledo Junior","25/06/2002"],["Eloiza Maria Neves Santos Silva","02/11/2011"],
+    ["Eucimara Santos Martins","14/01/2002"],["Arthur Berson Moreira Campos","18/02/2015"],
+    ["Analyce Victoria Marcelino Santana","20/10/2014"],["Sara Alves de Almeida","27/02/2015"],
+    ["Nicolas de Oliveira Silva","08/05/2012"],["Hygor Fernandes Toledo","05/02/2013"],
+    ["Cássio Gabriel Toledo da Silva","17/12/2014"],["Urique Alexander Rodrigues Mansabi","06/03/2016"],
+    ["Sther Lorrainne Sudre Silva","16/10/2012"],["Kennyd Lauanda Simão de Souza","25/09/2012"],
+    ["Emanuelly Alves Freitas","27/08/2013"],["Carla Eduarda Germano dos Santos","21/08/2013"],
+    ["Kemilly Kenay Ferreira da Silva","18/10/2013"],["Weliton","26/07/2012"],
+    ["Amanda Matias Moreira Alcântra","18/10/2017"],["Eyshila Vitória da Costa Charupá","25/07/2013"],
+    ["Saimon Cauã Rodrigues","17/04/2013"],["João Vítor Cassiano Figueiredo","06/06/2011"],
+    ["Hugo Viana Ramos","28/04/2002"],["Thales Gabriel Gomes Lima","05/01/2017"],
+    ["Jeremia Rodrigues Masabi","15/02/2015"],["Cataleya Rodrigues Masabi","06/06/2013"],
+    ["Urik Alexander Rodrigues Masabi","30/09/2016"],["João Marcelo Silva de Souza","05/06/2003"],
+    ["Luiz Gustavo Costa de Assis Carvalho","07/07/2013"],["Ygor Heleno da Silva","29/06/1997"],
+    ["Hellena Ribeiro Artiaga","30/04/2013"],["Sophia Ferreira de Oliveira","05/09/2013"],
+    ["Kauã Americo de Moraes","03/05/2013"],["Rayssa Mariana Souza de Paula","25/07/2005"],
+  ];
+
+  let criancas   = JSON.parse(localStorage.getItem('apada_atletas') || 'null');
+  if (!criancas) {
+    criancas = listaInicial.map(([nome,nasc],i)=>({id:i+1,nome,nasc,status:null,hora:null,justificativa:''}));
+    localStorage.setItem('apada_atletas', JSON.stringify(criancas));
+  }
+  let profData = JSON.parse(localStorage.getItem('apada_profs') || 'null') || equipeBase.map(p=>({...p}));
+  let filtroAtual = 'todos';
+
+  function salvarLocal() {
+    localStorage.setItem('apada_atletas', JSON.stringify(criancas));
+    localStorage.setItem('apada_profs', JSON.stringify(profData));
+  }
+
+  function hoje() { return new Date().toLocaleDateString('pt-BR',{weekday:'long',year:'numeric',month:'long',day:'numeric'}); }
+  function hojeStr() { return new Date().toLocaleDateString('pt-BR'); }
+  function horaAtual() { return new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'}); }
+
+  document.getElementById('dataHoje1').textContent = hoje();
+  document.getElementById('dataHoje2').textContent = hoje();
+
+  // ---- LOGIN ----
+  function fazerLogin() {
+    const client = google.accounts.oauth2.initTokenClient({
+      client_id: CLIENT_ID,
+      scope: SCOPES,
+      callback: (resp) => {
+        if (resp.error) { alert('Erro no login: ' + resp.error); return; }
+        accessToken = resp.access_token;
+        document.getElementById('login-screen').style.display = 'none';
+        document.getElementById('app-screen').style.display = 'block';
+        setSyncStatus('ok', 'Conectado ao Google Sheets');
+        // Tenta pegar email
+        fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
+          headers: { Authorization: 'Bearer ' + accessToken }
+        }).then(r=>r.json()).then(u=>{
+          document.getElementById('userEmail').textContent = u.email || '';
+        });
+        garantirAba();
+      }
+    });
+    client.requestAccessToken();
+  }
+
+  function fazerLogout() {
+    accessToken = null;
+    document.getElementById('app-screen').style.display = 'none';
+    document.getElementById('login-screen').style.display = 'block';
+  }
+
+  // ---- SYNC STATUS ----
+  function setSyncStatus(tipo, msg) {
+    const dot = document.getElementById('syncDot');
+    dot.className = 'dot ' + tipo;
+    document.getElementById('syncMsg').textContent = msg;
+  }
+
+  // ---- GARANTIR ABA DO DIA ----
+  async function garantirAba() {
+    if (!accessToken) return;
+    const nomeAba = hojeStr();
+    try {
+      // Busca abas existentes
+      const r = await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}?fields=sheets.properties.title`, {
+        headers: { Authorization: 'Bearer ' + accessToken }
+      });
+      const data = await r.json();
+      const abas = (data.sheets || []).map(s => s.properties.title);
+      if (!abas.includes(nomeAba)) {
+        // Cria nova aba
+        await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}:batchUpdate`, {
+          method: 'POST',
+          headers: { Authorization: 'Bearer ' + accessToken, 'Content-Type': 'application/json' },
+          body: JSON.stringify({ requests: [{ addSheet: { properties: { title: nomeAba } } }] })
+        });
+        // Escreve cabeçalhos
+        await escreverCabecalho(nomeAba);
+      }
+      // Sincroniza dados atuais
+      await sincronizarSheet();
+    } catch(e) {
+      setSyncStatus('erro', 'Erro ao conectar com Sheets');
+    }
+  }
+
+  async function escreverCabecalho(nomeAba) {
+    const valores = [
+      ['🏃 ATLETISMO APADA – Araputanga MT | Frequência: ' + nomeAba],
+      [],
+      ['EQUIPE TÉCNICA','','Cargo','Presença','Hora','Justificativa'],
+      ...equipeBase.map(p => ['', '', p.cargo + ' – ' + p.nome, '', '', '']),
+      [],
+      ['Nº','Nome Completo','Nascimento','Presença','Hora','Justificativa'],
+      ...criancas.map((c,i) => [i+1, c.nome, c.nasc, '', '', ''])
+    ];
+    await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/${encodeURIComponent(nomeAba + '!A1')}?valueInputOption=RAW`, {
+      method: 'PUT',
+      headers: { Authorization: 'Bearer ' + accessToken, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ values: valores })
+    });
+  }
+
+  // ---- SINCRONIZAR SHEET ----
+  async function sincronizarSheet() {
+    if (!accessToken) return;
+    setSyncStatus('syncing', 'Salvando...');
+    const nomeAba = hojeStr();
+    try {
+      // Equipe: linhas 4,5,6 (índice 0 = linha 1)
+      const linhasEquipe = profData.map(p => [
+        '', '', p.cargo + ' – ' + p.nome,
+        p.status === 'presente' ? 'P' : p.status === 'ausente' ? 'F' : '',
+        p.hora || '',
+        p.justificativa || ''
+      ]);
+
+      // Atletas: a partir da linha 8
+      const linhasAtletas = criancas.map((c,i) => [
+        i+1, c.nome, c.nasc,
+        c.status === 'presente' ? 'P' : c.status === 'ausente' ? 'F' : '',
+        c.hora || '',
+        c.justificativa || ''
+      ]);
+
+      const valores = [
+        [`🏃 ATLETISMO APADA – Araputanga MT | Frequência: ${nomeAba} | Gerado: ${horaAtual()}`],
+        [],
+        ['EQUIPE TÉCNICA','','Cargo','Presença','Hora','Justificativa'],
+        ...linhasEquipe,
+        [],
+        ['Nº','Nome Completo','Nascimento','Presença','Hora','Justificativa'],
+        ...linhasAtletas,
+        [],
+        ['', '', 'TOTAL PRESENTES', criancas.filter(c=>c.status==='presente').length, '', ''],
+        ['', '', 'TOTAL AUSENTES',  criancas.filter(c=>c.status==='ausente').length,  '', ''],
+        ['', '', 'NÃO MARCADOS',    criancas.filter(c=>!c.status).length,             '', ''],
+      ];
+
+      const resp = await fetch(
+        `https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/${encodeURIComponent(nomeAba + '!A1')}?valueInputOption=RAW`,
+        {
+          method: 'PUT',
+          headers: { Authorization: 'Bearer ' + accessToken, 'Content-Type': 'application/json' },
+          body: JSON.stringify({ values: valores })
+        }
+      );
+      if (resp.ok) {
+        setSyncStatus('ok', 'Salvo às ' + horaAtual());
+      } else {
+        setSyncStatus('erro', 'Erro ao salvar');
+      }
+    } catch(e) {
+      setSyncStatus('erro', 'Sem conexão');
+    }
+  }
+
+  function agendarSync() {
+    salvarLocal();
+    if (syncTimer) clearTimeout(syncTimer);
+    syncTimer = setTimeout(() => sincronizarSheet(), 1500);
+  }
+
+  // ---- EQUIPE ----
+  function renderProfs() {
+    const el = document.getElementById('profLista');
+    el.innerHTML = '';
+    profData.forEach(p => {
+      const block = document.createElement('div');
+      block.className = 'prof-block';
+      block.innerHTML = `
+        <div class="prof-row">
+          <div class="prof-info">
+            <div class="prof-cargo">${p.cargo}</div>
+            <div class="prof-nome">${p.nome}</div>
+          </div>
+          <span class="prof-hora">${p.hora||''}</span>
+          <div class="toggle">
+            <button class="btn-status presente ${p.status==='presente'?'active':''}" onclick="marcarProf('${p.id}','presente')">✓ Presente</button>
+            <button class="btn-status ausente ${p.status==='ausente'?'active':''}" onclick="marcarProf('${p.id}','ausente')">✗ Ausente</button>
+          </div>
+        </div>
+        <div class="just-wrap ${p.status==='ausente'?'show':''}">
+          <div class="just-label">✏️ Justificativa</div>
+          <textarea placeholder="Motivo da ausência..." oninput="salvarJustProf('${p.id}',this.value)">${p.justificativa||''}</textarea>
+        </div>`;
+      el.appendChild(block);
+    });
+  }
+
+  function marcarProf(id, status) {
+    const p = profData.find(x=>x.id===id);
+    if (!p) return;
+    p.status = p.status===status ? null : status;
+    p.hora   = p.status ? horaAtual() : null;
+    if (p.status!=='ausente') p.justificativa='';
+    renderProfs(); agendarSync();
+  }
+
+  function salvarJustProf(id, val) {
+    const p = profData.find(x=>x.id===id);
+    if (p) { p.justificativa=val; agendarSync(); }
+  }
+
+  // ---- ATLETAS ----
+  function abrirAdicionar() {
+    const nome = prompt('Nome completo do atleta:');
+    if (!nome||!nome.trim()) return;
+    const nasc = prompt('Data de nascimento (DD/MM/AAAA):') || '';
+    if (criancas.find(c=>c.nome.toLowerCase()===nome.trim().toLowerCase())) { alert('Já cadastrado!'); return; }
+    criancas.push({id:Date.now(),nome:nome.trim(),nasc,status:null,hora:null,justificativa:''});
+    renderizar(); agendarSync();
+  }
+
+  function marcarStatus(id, status) {
+    const c = criancas.find(c=>c.id===id);
+    if (!c) return;
+    c.status = c.status===status ? null : status;
+    c.hora   = c.status ? horaAtual() : null;
+    if (c.status!=='ausente') c.justificativa='';
+    renderizar(); agendarSync();
+  }
+
+  function salvarJust(id, val) {
+    const c = criancas.find(c=>c.id===id);
+    if (c) { c.justificativa=val; agendarSync(); }
+  }
+
+  function remover(id) {
+    if (!confirm('Remover este atleta?')) return;
+    criancas = criancas.filter(c=>c.id!==id);
+    renderizar(); agendarSync();
+  }
+
+  function marcarTodosPresentes() {
+    const hora = horaAtual();
+    criancas.forEach(c=>{ if(!c.status){c.status='presente';c.hora=hora;} });
+    renderizar(); agendarSync();
+  }
+
+  function filtrar(tipo, el) {
+    filtroAtual = tipo;
+    document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+    el.classList.add('active');
+    renderizar();
+  }
+
+  function renderizar() {
+    const busca = document.getElementById('buscaInput').value.toLowerCase();
+    let lista = criancas.filter(c=>c.nome.toLowerCase().includes(busca));
+    if (filtroAtual==='presentes')    lista = lista.filter(c=>c.status==='presente');
+    else if (filtroAtual==='ausentes') lista = lista.filter(c=>c.status==='ausente');
+    else if (filtroAtual==='nao-marcados') lista = lista.filter(c=>!c.status);
+
+    document.getElementById('totalNum').textContent     = criancas.length;
+    document.getElementById('presentesNum').textContent = criancas.filter(c=>c.status==='presente').length;
+    document.getElementById('ausentesNum').textContent  = criancas.filter(c=>c.status==='ausente').length;
+
+    const el    = document.getElementById('lista');
+    const vazio = document.getElementById('vazio');
+    el.innerHTML = '';
+    if (!lista.length) { vazio.style.display='block'; return; }
+    vazio.style.display = 'none';
+
+    lista.forEach(c => {
+      const idx = criancas.indexOf(c)+1;
+      const div = document.createElement('div');
+      div.className = 'crianca';
+      div.innerHTML = `
+        <div class="crianca-row">
+          <span class="num-ordem">${idx}</span>
+          <div class="info">
+            <div class="nome">${c.nome}</div>
+            <div class="nascimento">📅 ${c.nasc||'—'}</div>
+          </div>
+          <span class="hora-badge">${c.hora||''}</span>
+          <div class="toggle">
+            <button class="btn-status presente ${c.status==='presente'?'active':''}" onclick="marcarStatus(${c.id},'presente')">✓ Presente</button>
+            <button class="btn-status ausente ${c.status==='ausente'?'active':''}" onclick="marcarStatus(${c.id},'ausente')">✗ Ausente</button>
+          </div>
+          <button class="btn-remover" onclick="remover(${c.id})">🗑</button>
+        </div>
+        <div class="just-atleta ${c.status==='ausente'?'show':''}">
+          <div class="just-atleta-label">✏️ Justificativa</div>
+          <textarea placeholder="Motivo da ausência..." oninput="salvarJust(${c.id},this.value)">${c.justificativa||''}</textarea>
+        </div>`;
+      el.appendChild(div);
+    });
+  }
+
+  function limparDia() {
+    if (!confirm('Apagar marcações de hoje? (nomes ficam)')) return;
+    criancas.forEach(c=>{c.status=null;c.hora=null;c.justificativa='';});
+    profData.forEach(p=>{p.status=null;p.hora=null;p.justificativa='';});
+    renderProfs(); renderizar(); agendarSync();
+  }
+
+  renderProfs();
+  renderizar();
+</script>
+</body>
+</html>
